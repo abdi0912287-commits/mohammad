@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>امتیازشمار تخته‌نرد ۳ نفره</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Roboto+Slab:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/vazirmatn/400.css">
+<link rel="stylesheet" href="fonts/vazirmatn/500.css">
+<link rel="stylesheet" href="fonts/vazirmatn/600.css">
+<link rel="stylesheet" href="fonts/vazirmatn/700.css">
+<link rel="stylesheet" href="fonts/vazirmatn/800.css">
+<link rel="stylesheet" href="fonts/roboto-slab/500.css">
+<link rel="stylesheet" href="fonts/roboto-slab/700.css">
+<style>
+  :root{
+    --walnut-900:#1c120c;
+    --walnut-800:#2c1c12;
+    --walnut-700:#3d2717;
+    --walnut-600:#523522;
+    --ivory:#f2e6cc;
+    --ivory-dim:#c9b891;
+    --burgundy:#7c2d2d;
+    --burgundy-light:#a04440;
+    --gold:#c9a227;
+    --gold-light:#e4c25f;
+    --green-ok:#5b7a4f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top, #3a2417 0%, var(--walnut-900) 55%),
+      var(--walnut-900);
+    color:var(--ivory);
+    font-family:'Vazirmatn',sans-serif;
+    display:flex;
+    justify-content:center;
+    padding:28px 14px 60px;
+  }
+  .app{width:100%;max-width:640px;}
+  .num{font-family:'Roboto Slab',serif;}
+
+  header{text-align:center;margin-bottom:6px;}
+  header h1{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.5px;
+    margin:0 0 2px;
+    color:var(--ivory);
+  }
+  header p{margin:0;color:var(--ivory-dim);font-size:12.5px;}
+
+  /* --- نوار امتیازهای تخته (motif) --- */
+  .points-row{
+    display:flex;
+    height:20px;
+    margin:18px 0 22px;
+    gap:2px;
+    opacity:.9;
+  }
+  .points-row .pt{
+    flex:1;
+    height:100%;
+  }
+  .points-row .pt.gold{ background:var(--gold); clip-path: polygon(50% 0, 0 100%, 100% 100%); }
+  .points-row .pt.ivory{ background:var(--ivory-dim); clip-path: polygon(50% 100%, 0 0, 100% 0); }
+
+  .board{
+    background:var(--walnut-800);
+    border:1px solid var(--walnut-600);
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+
+  .players{
+    display:flex;
+    gap:12px;
+  }
+  .player{
+    flex:1;
+    background:var(--walnut-700);
+    border:1px solid var(--walnut-600);
+    border-radius:10px;
+    padding:14px;
+    text-align:center;
+    position:relative;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .player.eligible{border-color:var(--gold);}
+  .player.turn-glow{box-shadow:0 0 0 1px var(--gold), 0 0 18px rgba(201,162,39,.25);}
+  .player input.name{
+    background:transparent;
+    border:none;
+    color:var(--ivory);
+    font-family:'Vazirmatn',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    text-align:center;
+    width:100%;
+    border-bottom:1px dashed rgba(228,194,95,.4);
+    padding:2px 0 4px;
+    cursor:text;
+  }
+  .player input.name::placeholder{color:var(--ivory-dim);font-weight:500;opacity:.7;}
+  .player input.name:hover{border-bottom-color:var(--gold-light);}
+  .player input.name:focus{outline:none;border-bottom-color:var(--gold);}
+  .player .edit-hint{font-size:9.5px;color:var(--ivory-dim);opacity:.6;margin-top:2px;}
+  .player .score{
+    font-size:38px;
+    font-weight:700;
+    line-height:1;
+    margin:8px 0 2px;
+    color:var(--gold-light);
+  }
+  .player .matches{font-size:14.5px;color:var(--ivory);font-weight:600;margin-top:4px;}
+  .player .matches span{color:var(--gold-light);font-weight:700;font-size:16px;}
+
+  .cube-wrap{
+    display:flex;
+    justify-content:center;
+    margin:16px 0;
+  }
+  .cube{
+    width:74px;height:74px;
+    background:linear-gradient(145deg,var(--ivory) 0%, var(--ivory-dim) 100%);
+    color:var(--walnut-900);
+    border-radius:12px;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    border:2px solid var(--gold);
+    box-shadow:0 6px 16px rgba(0,0,0,.4);
+    transform:rotate(0deg);
+    transition:box-shadow .3s;
+  }
+  .cube.pending{
+    animation:pulse 1.1s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,.55);}
+    50%{box-shadow:0 0 0 10px rgba(201,162,39,0);}
+  }
+  .cube .val{font-family:'Roboto Slab',serif;font-size:26px;font-weight:700;}
+  .cube .lbl{font-size:9px;margin-top:2px;color:var(--walnut-700);}
+  .owner-line{text-align:center;font-size:12px;color:var(--ivory-dim);margin-top:4px;}
+
+  .double-row{
+    display:flex;gap:12px;margin-top:10px;
+  }
+  .double-row button{flex:1;}
+
+  button{
+    font-family:'Vazirmatn',sans-serif;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+    padding:9px 10px;
+    font-size:13px;
+    font-weight:600;
+    transition:filter .15s, transform .1s;
+  }
+  button:active{transform:scale(.97);}
+  button:disabled{opacity:.35;cursor:not-allowed;}
+
+  .btn-double{background:var(--walnut-600);color:var(--ivory);border:1px solid var(--gold);}
+  .btn-double:not(:disabled):hover{filter:brightness(1.15);}
+
+  .pending-banner{
+    margin-top:14px;
+    background:rgba(201,162,39,.12);
+    border:1px solid var(--gold);
+    border-radius:10px;
+    padding:12px;
+    text-align:center;
+  }
+  .pending-banner .msg{font-size:13.5px;margin-bottom:10px;color:var(--gold-light);font-weight:600;}
+  .accept-reject{display:flex;gap:10px;}
+  .accept-reject button{flex:1;padding:11px;font-size:14px;}
+  .btn-accept{background:var(--green-ok);color:#eafbe4;}
+  .btn-reject{background:var(--burgundy);color:#fbe8e6;}
+  .btn-accept:hover{filter:brightness(1.12);}
+  .btn-reject:hover{filter:brightness(1.12);}
+
+  .win-panel{
+    margin-top:16px;
+    display:flex;
+    gap:12px;
+  }
+  .win-col{
+    flex:1;
+    background:var(--walnut-700);
+    border:1px solid var(--walnut-600);
+    border-radius:10px;
+    padding:10px;
+  }
+  .mult-row{display:flex;gap:5px;margin-bottom:8px;}
+  .mult-chip{
+    flex:1;
+    background:var(--walnut-800);
+    color:var(--ivory-dim);
+    border:1px solid var(--walnut-600);
+    border-radius:6px;
+    padding:6px 2px;
+    font-size:11px;
+    text-align:center;
+  }
+  .mult-chip.active{
+    background:var(--gold);
+    color:var(--walnut-900);
+    border-color:var(--gold);
+    font-weight:700;
+  }
+  .btn-win{width:100%;background:var(--burgundy);color:#fbe8e6;}
+  .btn-win:not(:disabled):hover{filter:brightness(1.15);}
+
+  .settings-row{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:16px;font-size:12.5px;color:var(--ivory-dim);
+  }
+  .settings-row input{
+    width:52px;text-align:center;
+    background:var(--walnut-700);
+    border:1px solid var(--walnut-600);
+    color:var(--ivory);
+    border-radius:6px;
+    padding:4px;
+    font-family:'Roboto Slab',serif;
+  }
+
+  .match-banner{
+    margin-top:14px;
+    background:rgba(124,45,45,.18);
+    border:1px solid var(--burgundy-light);
+    border-radius:10px;
+    padding:14px;
+    text-align:center;
+  }
+  .match-banner .title{font-size:15px;font-weight:700;color:var(--gold-light);margin-bottom:8px;}
+  .match-banner button{background:var(--gold);color:var(--walnut-900);padding:9px 18px;}
+
+  .log-box{
+    margin-top:18px;
+    background:var(--walnut-900);
+    border:1px solid var(--walnut-600);
+    border-radius:10px;
+    padding:10px 12px;
+    max-height:180px;
+    overflow-y:auto;
+    font-size:12px;
+    line-height:2;
+    color:var(--ivory-dim);
+  }
+  .log-box .line{border-bottom:1px dashed rgba(255,255,255,.06);padding:2px 0;}
+  .log-box .line:last-child{border-bottom:none;color:var(--ivory);}
+
+  .footer-actions{
+    display:flex;gap:10px;margin-top:16px;
+  }
+  .footer-actions button{
+    flex:1;
+    background:var(--walnut-700);
+    color:var(--ivory-dim);
+    border:1px solid var(--walnut-600);
+    font-size:12px;
+  }
+  .footer-actions button:hover{color:var(--ivory);}
+
+  .history-actions{
+    display:flex;gap:10px;margin-top:16px;
+  }
+  .history-actions button{
+    flex:1;
+    background:var(--walnut-700);
+    color:var(--ivory-dim);
+    border:1px solid var(--walnut-600);
+    font-size:12px;
+  }
+  .history-actions button:hover:not(:disabled){color:var(--ivory);}
+  .history-actions .btn-clear{
+    background:rgba(124,45,45,.25);
+    border-color:var(--burgundy-light);
+    color:#f3c9c7;
+  }
+  .history-actions .btn-clear:hover:not(:disabled){filter:brightness(1.15);color:#fbe8e6;}
+  input[type=file]{display:none;}
+
+  .section-title{font-size:11px;color:var(--ivory-dim);margin:0 0 6px;text-align:center;letter-spacing:.4px;}
+  .players.p3{gap:8px;}
+  .players.p3 .player{padding:10px 6px;}
+  .players.p3 .player.playing{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold);}
+  .players.p3 .score{font-size:30px;}
+  .players.p3 .matches{font-size:12px;}
+  .pair-row{display:flex;gap:8px;align-items:center;justify-content:center;margin:18px 0 10px;font-size:12.5px;color:var(--ivory-dim);flex-wrap:wrap;}
+  select{background:var(--walnut-700);color:var(--ivory);border:1px solid var(--gold);border-radius:6px;padding:6px 8px;font-family:'Vazirmatn',sans-serif;font-size:13px;}
+  .pair-row button{background:var(--walnut-600);color:var(--ivory);border:1px solid var(--walnut-600);font-size:12px;}
+  .results{margin-top:6px;background:var(--walnut-900);border:1px solid var(--walnut-600);border-radius:10px;padding:8px 12px;max-height:280px;overflow-y:auto;font-size:12.5px;}
+  .results .row{padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.08);color:var(--ivory);}
+  .results .row:last-child{border-bottom:none;}
+  .results .empty{color:var(--ivory-dim);text-align:center;padding:6px;}
+  .timer-box{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 0;}
+  .timer-box .tlabel{font-size:12px;color:var(--ivory-dim);}
+  .timer-box .tval{font-size:26px;font-weight:700;color:var(--gold-light);letter-spacing:1px;direction:ltr;min-width:84px;text-align:center;}
+  .timer-box button{background:var(--walnut-600);color:var(--ivory);border:1px solid var(--gold);font-size:12px;padding:7px 12px;}
+  .results .meta{font-size:11px;color:var(--ivory-dim);margin-top:2px;}
+  .res-summary{text-align:center;font-size:12px;color:var(--gold-light);margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>امتیازشمار تخته‌نرد ۳ نفره</h1>
+    <p>هر دست تا سقف <span id="targetLabel">7</span> امتیاز</p>
+  </header>
+  <div class="points-row" id="pointsRow"></div>
+  <div class="board">
+    <div class="section-title">جدول کلی</div>
+    <div class="players p3" id="players3"></div>
+
+    <div class="pair-row">
+      بازی فعلی:
+      <select id="selA"></select> ⚔ <select id="selB"></select>
+      <button id="btnNewMatch">دست جدید</button>
+    </div>
+
+    <div class="players">
+      <div class="player" id="playerA"><div class="matches" id="curNameA"></div><div class="score num" id="scoreA">0</div></div>
+      <div class="player" id="playerB"><div class="matches" id="curNameB"></div><div class="score num" id="scoreB">0</div></div>
+    </div>
+
+    <div class="timer-box"><span class="tlabel">⏱ زمان این دست</span><span class="tval num" id="timerVal">00:00</span><button id="btnTimer">▶ شروع</button></div>
+
+    <div class="cube-wrap"><div class="cube" id="cubeEl"><div class="val num" id="cubeVal">1</div><div class="lbl">دابلینگ کیوب</div></div></div>
+    <div class="owner-line" id="ownerLine"></div>
+    <div class="double-row" id="doubleRow"><button class="btn-double" id="btnDoubleA"></button><button class="btn-double" id="btnDoubleB"></button></div>
+
+    <div class="pending-banner" id="pendingBanner" style="display:none;">
+      <div class="msg" id="pendingMsg"></div>
+      <div class="accept-reject"><button class="btn-accept" id="btnAccept">قبول دابل</button><button class="btn-reject" id="btnReject">رد دابل (کنار کشیدن)</button></div>
+    </div>
+
+    <div class="win-panel" id="winPanel">
+      <div class="win-col"><div class="section-title">ثبت برد <span id="winNameA"></span></div><div class="mult-row" id="multRowA"></div><button class="btn-win" id="btnWinA">ثبت برد</button></div>
+      <div class="win-col"><div class="section-title">ثبت برد <span id="winNameB"></span></div><div class="mult-row" id="multRowB"></div><button class="btn-win" id="btnWinB">ثبت برد</button></div>
+    </div>
+
+    <div class="match-banner" id="matchBanner" style="display:none;"><div class="title" id="matchBannerTitle"></div><div style="font-size:12px;color:var(--ivory-dim)">نتیجه ثبت شد. برای ادامه، بازیکنان بعدی را انتخاب کنید و «دست جدید» را بزنید.</div></div>
+
+    <div class="settings-row">امتیاز هر دست: <input type="number" id="targetInput" min="1"></div>
+    <div class="settings-row"><label><input type="checkbox" id="crawfordChk" style="width:auto"> قانون کراوفورد (ممنوعیت دابل در بازیِ اولی که یکی به یک امتیاز مانده به سقف می‌رسد)</label></div>
+
+    <div class="section-title" style="margin-top:18px">نتایج ثبت‌شده دست‌ها</div>
+    <div class="res-summary" id="resSummary"></div>
+    <div class="results" id="results"></div>
+    <div class="log-box" id="logBox"></div>
+
+    <div class="history-actions">
+      <button id="btnUndo">↶ واگرد</button><button id="btnRedo">↷ ازنو</button><button class="btn-clear" id="btnClear">پاک کردن همه</button>
+    </div>
+    <div class="footer-actions">
+      <button id="btnExport">دانلود فایل ذخیره</button><button id="btnCsv">خروجی نتایج (CSV)</button><button id="btnImportTrigger">بارگذاری فایل ذخیره</button>
+      <input type="file" id="fileInput" accept="application/json">
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const KEY='backgammon-3p';
+  const newTimer=()=>({elapsed:0,since:null,startedAt:null,finished:false});
+  const def=()=>({target:7,names:["","",""],pair:[0,1],sa:0,sb:0,cube:1,owner:null,wins:[0,0,0],games:[0,0,0],matches:[],log:[],crawfordRule:true,crawfordUsed:false,timer:newTimer(),mid:0});
+  let state=def(),pending=null,matchOver=false,mult={a:1,b:1},undoStack=[],redoStack=[];
+  const el=id=>document.getElementById(id);
+  const idx=s=>state.pair[s==='a'?0:1];
+  const nm=s=>dn(idx(s));
+  const oth=s=>s==='a'?'b':'a';
+  const isCrawford=()=>state.crawfordRule&&!state.crawfordUsed&&!matchOver&&Math.max(state.sa,state.sb)===state.target-1;
+  const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+  const dn=i=>(state.names[i]||'').trim()||('بازیکن '+fa(i+1));
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const pad=n=>String(n).padStart(2,'0');
+  const fmt=sec=>{sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=sec%60;return (h?h+':'+pad(m):pad(m))+':'+pad(x);};
+  const fdate=ts=>{try{const d=new Date(ts);return d.toLocaleDateString('fa-IR')+' '+d.toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});}catch(e){return new Date(ts).toLocaleString();}};
+  const addLog=t=>state.log.push(t);
+  // ----- تایمر -----
+  const timerMs=()=>{const t=state.timer;return t.elapsed+(t.since?Date.now()-t.since:0);};
+  function timerStart(){const t=state.timer;if(t.since||t.finished)return;t.since=Date.now();if(!t.startedAt)t.startedAt=Date.now();}
+  function timerPause(){const t=state.timer;if(t.since){t.elapsed+=Date.now()-t.since;t.since=null;}}
+  function timerReset(){state.timer=newTimer();}
+  function renderTimer(){
+    const t=state.timer,over=matchOver||t.finished;
+    el('timerVal').textContent=fmt(timerMs()/1000);
+    const b=el('btnTimer');
+    b.textContent=over?'🏁 پایان':(t.since?'⏸ توقف':(t.elapsed>0?'▶ ادامه':'▶ شروع'));
+    b.disabled=over;
+  }
+  function migrate(){
+    const o=["طلا","عبدی","یوسفی"];
+    if(!Array.isArray(state.names)||state.names.length!==3)state.names=["","",""];
+    else if(state.names.every((n,i)=>n===o[i]))state.names=["","",""];
+    if(!state.timer||typeof state.timer!=='object')state.timer=newTimer();
+    if(!Array.isArray(state.matches))state.matches=[];
+  }
+  const snap=()=>JSON.stringify({state,pending,matchOver,mult});
+  function restore(s){
+    const o=JSON.parse(s),t=state.timer,same=(o.state.mid||0)===(state.mid||0);
+    state=o.state;if(same)state.timer=t;
+    pending=o.pending;matchOver=o.matchOver;mult=o.mult;
+    if(same){
+      if(!matchOver&&t.finished){t.finished=false;timerStart();}
+      else if(matchOver&&!t.finished){timerPause();t.finished=true;}
+    }
+  }
+  function push(){undoStack.push(snap());if(undoStack.length>50)undoStack.shift();redoStack=[];}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  function done(){save();render();}
+  function undo(){if(!undoStack.length)return;redoStack.push(snap());restore(undoStack.pop());done();}
+  function redo(){if(!redoStack.length)return;undoStack.push(snap());restore(redoStack.pop());done();}
+
+  function checkOver(){
+    const t=state.target;
+    if(state.sa>=t||state.sb>=t){
+      matchOver=true;
+      const w=state.sa>=t?'a':'b';
+      state.wins[idx(w)]++;
+      const ms=timerMs();timerPause();state.timer.finished=true;
+      state.matches.push({a:idx('a'),b:idx('b'),sa:state.sa,sb:state.sb,w:idx(w),na:dn(idx('a')),nb:dn(idx('b')),nw:dn(idx(w)),dur:Math.round(ms/1000),start:state.timer.startedAt,end:Date.now()});
+      addLog(`دست با برد ${nm(w)} تمام شد (${state.sa} - ${state.sb})`);
+    }
+  }
+  function award(side,points,txt){
+    const wasC=isCrawford();
+    if(side==='a')state.sa+=points;else state.sb+=points;
+    state.games[idx(side)]++;
+    addLog(txt);
+    checkOver();
+    if(!matchOver){state.cube=1;state.owner=null;if(wasC){state.crawfordUsed=true;addLog('بازی کراوفورد تمام شد؛ دابل از بازی بعد آزاد است');}}
+    mult={a:1,b:1};
+  }
+  function startDouble(s){
+    if(pending||matchOver)return;
+    if(state.owner&&state.owner!==s)return;
+    if(isCrawford())return;
+    timerStart();push();pending={by:s,value:state.cube*2};
+    addLog(`دابل توسط ${nm(s)} → ${pending.value}`);done();
+  }
+  function acceptDouble(){
+    if(!pending)return;timerStart();push();
+    const o=oth(pending.by);
+    state.cube=pending.value;state.owner=o;
+    addLog(`${nm(o)} دابل را قبول کرد`);pending=null;done();
+  }
+  function rejectDouble(){
+    if(!pending)return;push();
+    const by=pending.by;pending=null;
+    addLog(`${nm(oth(by))} دابل را رد کرد`);
+    award(by,state.cube,`${nm(by)} با رد دابل ${state.cube} امتیاز گرفت`);done();
+  }
+  function recordWin(s){
+    if(pending||matchOver)return;timerStart();push();
+    const p=state.cube*mult[s];
+    award(s,p,`${nm(s)} با برد ${p} امتیاز گرفت`);done();
+  }
+  function resetMatch(){
+    state.sa=0;state.sb=0;state.crawfordUsed=false;state.cube=1;state.owner=null;pending=null;matchOver=false;mult={a:1,b:1};timerReset();state.mid=(state.mid||0)+1;
+  }
+  function newMatch(){
+    if(!matchOver&&(state.sa||state.sb)&&!confirm("دست جاری ناتمام است و نتیجه‌اش ثبت نمی‌شود. ادامه می‌دهید؟"))return;
+    push();resetMatch();timerStart();addLog(`دست جدید: ${nm('a')} و ${nm('b')}`);done();
+  }
+  function setPair(which,val){
+    const v=parseInt(val,10);
+    if(!matchOver&&(state.sa||state.sb)&&!confirm("دست جاری ناتمام است. تعویض بازیکنان آن را صفر می‌کند. ادامه می‌دهید؟")){render();return;}
+    push();
+    const p=state.pair.slice();p[which]=v;
+    if(p[0]===p[1])p[1-which]=[0,1,2].find(i=>i!==v&&i!==p[1-which]);
+    state.pair=p;resetMatch();addLog(`بازیکنان: ${nm('a')} و ${nm('b')}`);done();
+  }
+  function rename(i,v){
+    push();state.names[i]=v||"";done();
+  }
+  function setTarget(v){
+    const n=parseInt(v,10);
+    if(!isNaN(n)&&n>0){push();state.target=n;matchOver=false;done();}
+  }
+  function clearAll(){
+    if(!confirm("همه چیز پاک می‌شود: امتیازها، نتایج ضبط‌شده، زمان‌ها و لاگ. مطمئنید؟"))return;
+    push();state=def();pending=null;matchOver=false;mult={a:1,b:1};done();
+  }
+  function getPlugin(name){
+    const c=window.Capacitor;if(!c)return null;
+    try{return (c.Plugins&&c.Plugins[name])||c.registerPlugin(name);}catch(e){return null;}
+  }
+  async function saveFile(name,text,mime){
+    const c=window.Capacitor;
+    if(c&&c.isNativePlatform&&c.isNativePlatform()){
+      try{
+        const FS=getPlugin('Filesystem'),SH=getPlugin('Share');
+        const r=await FS.writeFile({path:name,data:text,directory:'CACHE',encoding:'utf8'});
+        await SH.share({title:name,url:r.uri,dialogTitle:'ذخیره یا ارسال فایل'});
+        return;
+      }catch(e){
+        if(e&&/cancel/i.test(String(e.message||e)))return;
+        alert('ذخیره فایل ممکن نشد: '+(e&&e.message?e.message:e));return;
+      }
+    }
+    const b=new Blob([text],{type:mime});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;
+    document.body.appendChild(a);a.click();a.remove();
+  }
+  function exportSave(){saveFile("backgammon_3p_save.json",JSON.stringify(state,null,2),"application/json");}
+  function exportCsv(){
+    const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+    const rows=[['ردیف','تاریخ پایان','ساعت پایان','بازیکن اول','امتیاز اول','بازیکن دوم','امتیاز دوم','برنده','مدت (ثانیه)','مدت (دقیقه:ثانیه)']];
+    state.matches.forEach((m,i)=>{
+      const d=m.end?new Date(m.end):null;
+      let dd='',tt='';
+      if(d){try{dd=d.toLocaleDateString('fa-IR');tt=d.toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});}catch(e){dd=d.toLocaleDateString();tt=d.toLocaleTimeString();}}
+      rows.push([i+1,dd,tt,m.na!=null?m.na:dn(m.a),m.sa,m.nb!=null?m.nb:dn(m.b),m.sb,m.nw!=null?m.nw:dn(m.w),m.dur!=null?m.dur:'',m.dur!=null?fmt(m.dur):'']);
+    });
+    saveFile("backgammon_results.csv",'\uFEFF'+rows.map(r=>r.map(q).join(',')).join('\r\n'),"text/csv;charset=utf-8");
+  }
+  function importSave(f){
+    const r=new FileReader();
+    r.onload=e=>{try{push();state=Object.assign(def(),JSON.parse(e.target.result));migrate();pending=null;matchOver=state.sa>=state.target||state.sb>=state.target;done();}catch(x){alert("فایل انتخاب‌شده معتبر نیست.");}};
+    r.readAsText(f);
+  }
+
+  function buildMult(s){
+    const c=el(s==='a'?'multRowA':'multRowB');c.innerHTML="";
+    [[1,"ساده ×۱"],[2,"گمون ×۲"],[3,"مارس ×۳"]].forEach(([v,l])=>{
+      const d=document.createElement('div');d.className='mult-chip'+(mult[s]===v?' active':'');d.textContent=l;
+      d.onclick=()=>{if(!pending&&!matchOver){mult[s]=v;render();}};c.appendChild(d);
+    });
+  }
+  function buildCards(){
+    const box=el('players3');
+    if(!box.children.length){
+      box.innerHTML=[0,1,2].map(i=>`<div class="player" id="pc${i}"><input class="name" id="n${i}" maxlength="14" placeholder="نام بازیکن ${fa(i+1)}" autocomplete="off"><div class="score num" id="w${i}">0</div><div class="matches">دست‌های برده</div><div class="matches">بردها: <span id="g${i}">0</span></div></div>`).join("");
+      [0,1,2].forEach(i=>el('n'+i).addEventListener('change',e=>rename(i,e.target.value.trim())));
+    }
+    [0,1,2].forEach(i=>{
+      el('n'+i).value=state.names[i];el('w'+i).textContent=state.wins[i];el('g'+i).textContent=state.games[i];
+      el('pc'+i).classList.toggle('playing',state.pair.includes(i));
+    });
+  }
+  function render(){
+    el('targetLabel').textContent=state.target;el('targetInput').value=state.target;
+    buildCards();
+    ['selA','selB'].forEach((id,k)=>{
+      const s=el(id);
+      s.innerHTML=[0,1,2].map(i=>`<option value="${i}">${esc(dn(i))}</option>`).join("");
+      s.value=state.pair[k];
+    });
+    el('curNameA').textContent=nm('a');el('curNameB').textContent=nm('b');
+    el('scoreA').textContent=state.sa;el('scoreB').textContent=state.sb;
+    el('winNameA').textContent=nm('a');el('winNameB').textContent=nm('b');
+    el('cubeVal').textContent=state.cube;el('cubeEl').classList.toggle('pending',!!pending);
+    const cr=isCrawford();
+    el('ownerLine').textContent=cr?"🚫 بازی کراوفورد — در این بازی دابل مجاز نیست":(state.owner?`کیوب در اختیار ${nm(state.owner)} است`:"کیوب آزاد است — هر دو طرف می‌توانند دابل کنند");
+    el('crawfordChk').checked=!!state.crawfordRule;
+    const eA=!state.owner||state.owner==='a',eB=!state.owner||state.owner==='b';
+    el('btnDoubleA').textContent=`دابل توسط ${nm('a')} (→${state.cube*2})`;
+    el('btnDoubleB').textContent=`دابل توسط ${nm('b')} (→${state.cube*2})`;
+    el('btnDoubleA').disabled=!eA||cr||!!pending||matchOver;
+    el('btnDoubleB').disabled=!eB||cr||!!pending||matchOver;
+    el('playerA').classList.toggle('eligible',eA&&!cr&&!pending&&!matchOver);
+    el('playerB').classList.toggle('eligible',eB&&!cr&&!pending&&!matchOver);
+    const pb=el('pendingBanner');
+    if(pending){el('pendingMsg').textContent=`${nm(pending.by)} پیشنهاد دابل به ${nm(oth(pending.by))} داد — ارزش جدید کیوب: ${pending.value}`;pb.style.display='block';}
+    else pb.style.display='none';
+    buildMult('a');buildMult('b');
+    el('btnWinA').disabled=el('btnWinB').disabled=!!pending||matchOver;
+    el('winPanel').style.opacity=el('doubleRow').style.opacity=(pending||matchOver)?.45:1;
+    el('btnUndo').disabled=!undoStack.length;el('btnRedo').disabled=!redoStack.length;
+    const mb=el('matchBanner');
+    if(matchOver){const w=state.sa>=state.target?'a':'b';el('matchBannerTitle').textContent=`دست با برد ${nm(w)} به پایان رسید 🏆`;mb.style.display='block';}
+    else mb.style.display='none';
+    const ms=state.matches;
+    const tot=ms.reduce((a,m)=>a+(m.dur||0),0);
+    el('resSummary').textContent=ms.length?`${fa(ms.length)} دست ثبت شده · مجموع زمان ${fa(fmt(tot))} · میانگین هر دست ${fa(fmt(tot/ms.length))}`:'';
+    el('results').innerHTML=ms.length?ms.slice().reverse().map((m,k)=>{
+      const n=ms.length-k,A=m.na!=null?m.na:dn(m.a),B=m.nb!=null?m.nb:dn(m.b),W=m.nw!=null?m.nw:dn(m.w);
+      const meta=(m.dur!=null||m.end)?`<div class="meta">${m.dur!=null?'⏱ '+fa(fmt(m.dur)):''}${m.end?' · '+fdate(m.end):''}</div>`:'';
+      return `<div class="row">${fa(n)}. ${esc(A)} ${fa(m.sa)} — ${fa(m.sb)} ${esc(B)} · برنده: <b>${esc(W)}</b> 🏆${meta}</div>`;
+    }).join(""):'<div class="empty">هنوز دستی تمام نشده است</div>';
+    renderTimer();
+    const lb=el('logBox');lb.innerHTML=state.log.map(l=>`<div class="line">${esc(l)}</div>`).join("");lb.scrollTop=lb.scrollHeight;
+  }
+
+  el('btnDoubleA').onclick=()=>startDouble('a');el('btnDoubleB').onclick=()=>startDouble('b');
+  el('btnAccept').onclick=acceptDouble;el('btnReject').onclick=rejectDouble;
+  el('btnWinA').onclick=()=>recordWin('a');el('btnWinB').onclick=()=>recordWin('b');
+  el('btnNewMatch').onclick=newMatch;el('btnUndo').onclick=undo;el('btnRedo').onclick=redo;el('btnClear').onclick=clearAll;
+  el('selA').onchange=e=>setPair(0,e.target.value);el('selB').onchange=e=>setPair(1,e.target.value);
+  el('targetInput').addEventListener('change',e=>setTarget(e.target.value));
+  el('crawfordChk').addEventListener('change',e=>{push();state.crawfordRule=e.target.checked;done();});
+  el('btnExport').onclick=exportSave;el('btnCsv').onclick=exportCsv;
+  el('btnTimer').onclick=()=>{if(matchOver||state.timer.finished)return;if(state.timer.since)timerPause();else timerStart();done();};
+  setInterval(renderTimer,1000);el('btnImportTrigger').onclick=()=>el('fileInput').click();
+  el('fileInput').addEventListener('change',e=>{if(e.target.files&&e.target.files[0])importSave(e.target.files[0]);});
+
+  const row=el('pointsRow');
+  for(let i=0;i<14;i++){const d=document.createElement('div');d.className='pt '+(i%2?'ivory':'gold');row.appendChild(d);}
+  try{const v=localStorage.getItem(KEY);if(v)state=Object.assign(def(),JSON.parse(v));if(!localStorage.getItem(KEY+'-t7')){state.target=7;localStorage.setItem(KEY+'-t7','1');save();}}catch(e){}
+  migrate();
+  matchOver=state.sa>=state.target||state.sb>=state.target;
+  render();
+})();
+</script>
+</body>
+</html>
